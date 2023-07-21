@@ -13,6 +13,7 @@ import {
   BatchScope,
   ObserverListeners,
 } from './environment'
+import { activeBoundary } from './autorun'
 
 const ITERATION_KEY = Symbol('iteration key')
 

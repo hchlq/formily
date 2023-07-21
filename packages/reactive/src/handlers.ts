@@ -7,13 +7,12 @@ import { isObservable, isSupportObservable } from './externals'
 import { createObservable } from './internals'
 
 const wellKnownSymbols = new Set(
-  Object.getOwnPropertyNames(Symbol)
-    .reduce((buf: Symbol[], key) => {
-      if (key === 'arguments' || key === 'caller') return buf    
-      const value = Symbol[key]
-      if (typeof value === 'symbol') return buf.concat(value)
-      return buf
-    }, [])
+  Object.getOwnPropertyNames(Symbol).reduce((buf: Symbol[], key) => {
+    if (key === 'arguments' || key === 'caller') return buf
+    const value = Symbol[key]
+    if (typeof value === 'symbol') return buf.concat(value)
+    return buf
+  }, [])
 )
 
 const hasOwnProperty = Object.prototype.hasOwnProperty
@@ -229,6 +228,7 @@ export const baseHandlers: ProxyHandler<any> = {
   deleteProperty(target, key) {
     const oldValue = target[key]
     delete target[key]
+    // debugger
     runReactionsFromTargetKey({
       target,
       key,

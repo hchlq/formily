@@ -15,52 +15,40 @@ interface IValue {
   currentValue?: any
   oldValue?: any
 }
+export let activeBoundary: any = null
 
 export const autorun = (tracker: Reaction, name = 'AutoRun') => {
   const reaction: Reaction = () => {
     if (!isFn(tracker)) return
 
-    const keys = reaction._boundary.get(reaction._updateTarget)
-    if (keys && keys.has(reaction._updateKey)) {
-      const boundary = keys.get(reaction._updateKey)
-      if (boundary === 1) {
-        return
-      }
-      keys.set(reaction._updateKey, 0)
+    console.log(
+      'activeBoundary: ',
+      activeBoundary,
+      reaction._boundary,
+      reaction._updateKey
+    )
+    if (activeBoundary && activeBoundary === reaction._boundary) {
+      return
     }
 
     if (ReactionStack.indexOf(reaction) === -1) {
       releaseBindingReactions(reaction)
       try {
         batchStart()
+        // reaction._boundary++
+        // activeBoundary = reaction._boundary
         ReactionStack.push(reaction)
         tracker()
+        // activeBoundary--
       } finally {
         ReactionStack.pop()
 
-        const key = reaction._updateKey
-        const target = reaction._updateTarget
-        if (key) {
-          const keys =
-            reaction._boundary.get(reaction._updateTarget) || new Map()
-
-          const boundary = keys.get(key)
-
-          if (boundary === undefined) {
-            keys.set(key, 1)
-          }
-
-          reaction._boundary.set(reaction._updateTarget, keys)
-        }
-
+        reaction._boundary++
+        activeBoundary = reaction._boundary
         batchEnd()
+        activeBoundary = 0
 
-        console.log('batchEnd')
-        const keys = reaction._boundary.get(target)
-        if (keys) {
-          keys.delete(key)
-        }
-
+        reaction._boundary = 0
         reaction._memos.cursor = 0
         reaction._effects.cursor = 0
       }
@@ -76,9 +64,8 @@ export const autorun = (tracker: Reaction, name = 'AutoRun') => {
       cursor: 0,
     }
   }
-  window.reaction = reaction
 
-  reaction._boundary = new Map()
+  reaction._boundary = 0
   reaction._name = name
   cleanRefs()
   reaction()
