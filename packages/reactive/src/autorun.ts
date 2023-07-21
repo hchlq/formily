@@ -24,9 +24,9 @@ export const autorun = (tracker: Reaction, name = 'AutoRun') => {
     if (keys && keys.has(reaction._updateKey)) {
       const boundary = keys.get(reaction._updateKey)
       if (boundary === 1) {
+        keys.set(reaction._updateKey, 0)
         return
       }
-      keys.set(reaction._updateKey, 0)
     }
 
     if (ReactionStack.indexOf(reaction) === -1) {
@@ -44,18 +44,15 @@ export const autorun = (tracker: Reaction, name = 'AutoRun') => {
           const keys =
             reaction._boundary.get(reaction._updateTarget) || new Map()
 
-          const boundary = keys.get(key)
+          const excuteTime = keys.get(key)
 
-          if (boundary === undefined) {
-            keys.set(key, 1)
-          }
+          keys.set(key, 1)
 
           reaction._boundary.set(reaction._updateTarget, keys)
         }
 
         batchEnd()
 
-        console.log('batchEnd')
         const keys = reaction._boundary.get(target)
         if (keys) {
           keys.delete(key)
@@ -76,7 +73,7 @@ export const autorun = (tracker: Reaction, name = 'AutoRun') => {
       cursor: 0,
     }
   }
-  window.reaction = reaction
+  // window.reaction = reaction
 
   reaction._boundary = new Map()
   reaction._name = name
